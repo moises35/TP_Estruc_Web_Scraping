@@ -1,7 +1,9 @@
 # Importamos los módulos necesarios
 import requests
 import re
+import matplotlib.pyplot as plt
 from bs4 import BeautifulSoup
+from wordcloud import WordCloud
 
 # Declaración de constantes
 URL = 'https://cienciasdelsur.com/'
@@ -94,5 +96,13 @@ print('--> Las 50 palabras más frecuentes son: ')
 for palabra, frecuencia in frecuencias_ordenadas[:50]:
     print(f'\t - {palabra} : {frecuencia}')  
 
-print('-----------------------------------------------------------------------------------------')
-# Dibujamos el 
+# Crear la nube de palabras
+wordcloud = WordCloud(width=800, height=800, background_color='white').generate_from_frequencies(frecuencias)
+
+# Visualizar la nube de palabras
+plt.figure(figsize=(8, 8), facecolor=None)
+plt.imshow(wordcloud)
+plt.axis("off")
+plt.tight_layout(pad=0)
+plt.show()
+print('🎉 Proceso finalizado con éxito!')
