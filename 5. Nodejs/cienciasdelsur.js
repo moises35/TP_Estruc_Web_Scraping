@@ -2,6 +2,8 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 const fs = require('fs');
+const { Canvas } = require('skia-canvas');
+const WordCloud = require('node-wordcloud')((w, h) => new Canvas(w, h));
 
 // Declaración de constantes
 const URL = 'https://cienciasdelsur.com/'
@@ -78,12 +80,17 @@ const main = async () => {
     const articles_content = (await Promise.all([get_articles_content(links_articles)]))[0];
 
     // Escribimos el contenido de los articulos en un archivo de texto
-    fs.writeFile(OUTPUT_FILE_ARTICLES_CONTENT, articles_content.join('\n'), (err) => {
-        if (err) throw err;
+    try {
+        fs.writeFileSync(OUTPUT_FILE_ARTICLES_CONTENT, articles_content.join('\n'));
         console.log(`📝 Archivo ${OUTPUT_FILE_ARTICLES_CONTENT} creado correctamente`);
-    });
+    } catch (error) {
+        console.error(error);
+    }
+
+    console.log(`\n-------------------------------------------------------------------------------`);
 
     // Leemos el archivo de texto con el contenido de los articulos
+    console.log('\n📊 Iniciando análisis de frecuencias de palabras...')
     const data = fs.readFileSync(OUTPUT_FILE_ARTICLES_CONTENT, 'utf8');
 
     // Se convierte el texto a minusculas, se eliminan los caracteres especiales y se separa por palabras
@@ -100,6 +107,44 @@ const main = async () => {
 
     // Se ordenan las palabras por frecuencia y se exporta a un archivo
     const words_frequencies_sorted = Object.entries(words_frequencies).sort((a, b) => b[1] - a[1]);
+    fs.writeFileSync(OUTPUT_FILE_FREQUENCIES, words_frequencies_sorted.map(word => word.join(' - ')).join('\n'));
+    console.log(`📝 Se ha generado el archivo: ${OUTPUT_FILE_FREQUENCIES} con las frecuencias de las palabras!`)
+
+    // Mostramos las 50 palabras más frecuentes
+    console.log('--> 📊 Las 50 palabras más frecuentes son:')
+    console.log('\t', words_frequencies_sorted.slice(0, 50).map(word => word.join(' - ')).join('\n\t'))
+
+    console.log(`\n-------------------------------------------------------------------------------`);
+    
+    // Se genera la nube de palabras de las 50 palabras más frecuentes
+    console.log('\n ☁ Generando nube de palabras...')
+    const list = words_frequencies_sorted.slice(0, 50).map(word => ([word[0], word[1]]));
+
+    const colorPanel = ['#54b399', '#6092c0', '#d36086', '#9170b8', '#ca8eae', '#d6bf57', '#b9a888', '#da8b45', '#aa6556', '#e7664c']
+
+    const options = {
+        gridSize: 8,
+        rotateRatio: 1,
+        rotationSteps: 7,
+        rotationRange: [-70, 70],
+        backgroundColor: '#fff',
+        sizeRange: [18, 70],
+        color: function (word, weight) {
+            return colorPanel[Math.floor(Math.random() * colorPanel.length)]
+        },
+        fontWeight: 'bold',
+        fontFamily: `"PingFang SC", "Microsoft YaHei", "Segoe UI Emoji", "Segoe UI Emoji","Segoe UI Historic"`,
+        shape: 'square'
+    }
+
+    const canvas = new Canvas(500, 500);
+    const wordcloud = WordCloud(canvas, { list, ...options })
+    wordcloud.draw()
+    canvas.toBuffer().then(buffer => {
+        fs.writeFileSync('nube_de_palabras.png', buffer)
+        console.log('✅ Nube de palabras generada correctamente!')
+        console.log('🎉 Fin del programa!')
+    })
 }
 
 
