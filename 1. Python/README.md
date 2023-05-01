@@ -1,7 +1,7 @@
 <!-- Cabecera principal -->
 <div align="center">
   <a href="https://www.python.org/">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/1869px-Python-logo-notext.svg.png" alt="Logo Python" width="80" height="80">
+    <img src="https://cdn.svgporn.com/logos/python.svg" alt="Logo Python" width="80" height="80">
   </a>
 
   <h3 align="center">Python - Web Scrapper</h3>
