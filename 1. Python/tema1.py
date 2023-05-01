@@ -96,6 +96,8 @@ print('--> Las 50 palabras más frecuentes son: ')
 for palabra, frecuencia in frecuencias_ordenadas[:50]:
     print(f'\t - {palabra} : {frecuencia}')  
 
+frecuencias = dict(frecuencias_ordenadas[:50])
+
 # Crear la nube de palabras
 wordcloud = WordCloud(width=800, height=800, background_color='white').generate_from_frequencies(frecuencias)
 
