@@ -2,9 +2,9 @@
   "name": "nodejs",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "tema1.js",
   "scripts": {
-    "start": "node cienciasdelsur.js",
+    "start": "node tema1.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -14,7 +14,6 @@
     "axios": "^1.3.5",
     "cheerio": "^1.0.0-rc.12",
     "node-wordcloud": "^0.0.2",
-    "request": "^2.88.2",
     "skia-canvas": "^1.0.1"
   },
   "devDependencies": {
