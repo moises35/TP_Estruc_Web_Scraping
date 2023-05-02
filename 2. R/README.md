@@ -16,6 +16,8 @@
     ```R
     install.packages("rvest")
     install.packages("wordcloud")
+    install.packages("svDialogs")
+    install.packages("stringr")
     ```
 2. Ejecutar el script `tema1.r` o `tema2.r`
 3. Listo! 🎉
@@ -27,6 +29,8 @@
 ## Paquetes utilizados 📦
 + **rvest:** Permite extraer información de páginas web.
 + **wordcloud:** Permite crear nubes de palabras.
++ **svDialogs:** Permite crear ventanas de diálogo.
++ **stringr:** Permite manipular cadenas de caracteres.
 
 
 -----------------------------------------------------------------------  
