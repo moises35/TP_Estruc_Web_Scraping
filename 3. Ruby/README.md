@@ -47,6 +47,7 @@
 + **Nokogiri:** Libreria para parsear HTML y XML.
 + **Open-uri:** Libreria para abrir y leer archivos remotos.
 + **Magic_Cloud**: Libreria para generar nubes de palabras.
++ **Rmagick**: Libreria para generar gráficos e imágenes.
 
 
 -----------------------------------------------------------------------  
