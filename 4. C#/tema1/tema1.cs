@@ -49,6 +49,11 @@ namespace WebScraper {
                     linksAux.Add(link);
                 }
             }
+            // Imprimimos los links de los artículos con sus titulos
+            foreach (var article in linksArticles) {
+                Console.WriteLine(article["title"] + " - " + article["link"]);
+            }
+
         }
     }
 }
