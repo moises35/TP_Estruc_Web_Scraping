@@ -1,4 +1,8 @@
-﻿using HtmlAgilityPack;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using HtmlAgilityPack;
 using ScrapySharp.Extensions;
 using ScrapySharp.Network;
 
@@ -49,7 +53,29 @@ namespace WebScraper {
                 }
             }
 
-            // 
+            // Iteramos sobre la lista de links y sacamos el contenido de cada uno
+            var all_text_articles = new List<string>();
+            foreach (var link in links_articles) {
+                Console.WriteLine("* Iniciando scraping en el articulo: " + link["title"] + "...");
+                var webpage2 = browser.NavigateToPage(new Uri(link["link"]));
+                var article_content = webpage2.Html.CssSelect("div.td-post-content").Single();
+                var article_text_content = article_content.CssSelect("p");
+                foreach (var paragraph in article_text_content) {
+                    all_text_articles.Add(paragraph.InnerText);
+                }
+
+                Console.WriteLine($"- Se finalizo el scraping en el articulo: {link["title"]}\n");
+            }
+
+            // Guardamos el contenido de todos los articulos en un archivo de texto
+            using (StreamWriter file = new StreamWriter(Constants.OUTPUT_FILE_ARTICLES_CONTENT)) {
+                foreach (var text in all_text_articles) {
+                    file.WriteLine(text + " ");
+                }
+            }
+
+            Console.WriteLine($"** Se ha generado el archivo: {Constants.OUTPUT_FILE_ARTICLES_CONTENT} con el contenido de todos los articulos scrapeados!");
+            Console.WriteLine("-----------------------------------------------------------------------------------------");
         }
     }
 }
