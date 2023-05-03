@@ -1,5 +1,7 @@
-﻿using System;
-using HtmlAgilityPack;
+﻿using HtmlAgilityPack;
+using ScrapySharp.Extensions;
+using ScrapySharp.Network;
+
 
 namespace WebScraper {
     // Declaracion de constantes
@@ -20,40 +22,34 @@ namespace WebScraper {
 
     class Program {
         static void Main(string[] args) {
-            // Creamos el objeto HttpClient y hacemos la petición
-            HttpClient httpClient = new HttpClient();
-            HttpResponseMessage response = httpClient.GetAsync(Constants.URL).Result;
-            string content = response.Content.ReadAsStringAsync().Result;
-            
-            // Creamos el objeto HtmlDocument con el contenido de la página
-            HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml(content);
+            // Creamos la instancia de la clase ScrapingBrowser
+            var browser = new ScrapingBrowser();
+
+            // Hacemos la petición y obtenemos el objeto WebPage
+            WebPage webpage = browser.NavigateToPage(new Uri(Constants.URL));
+            HtmlNode html = webpage.Html;
 
             // Obtenemos todos los div que tengan la clase "td-module-thumb" (contenedor de los artículos)
-            var articlesContainer = doc.DocumentNode.Descendants("div")
-                .Where(node => node.GetAttributeValue("class", "").Equals("td-module-thumb"));
+            var articles_container = html.CssSelect("div.td-module-thumb");
 
-            // Obtenemos el link de cada artículo y lo guardamos en una lista
-            List<Dictionary<string, string>> linksArticles = new List<Dictionary<string, string>>();
-            List<string> linksAux = new List<string>();
-            foreach (var article in articlesContainer) {
-                string title = article.Descendants("a").First().GetAttributeValue("title", "");
-                string link = article.Descendants("a").First().GetAttributeValue("href", "");
+            // Obtenemos el link de cada articulo y lo guardamos en una lista
+            var links_articles = new List<Dictionary<string, string>>();
+            var links_aux = new List<string>();
+            foreach (var article in articles_container) {
+                string title = article.CssSelect("a").Single().GetAttributeValue("title", "");
+                string link = article.CssSelect("a").Single().GetAttributeValue("href", "");
 
                 // Si el link no está en la lista, lo agregamos
-                if (!linksAux.Contains(link)) {
-                    Dictionary<string, string> articleLink = new Dictionary<string, string>();
-                    articleLink.Add("title", title);
-                    articleLink.Add("link", link);
-                    linksArticles.Add(articleLink);
-                    linksAux.Add(link);
+                if (!links_aux.Contains(link)) {
+                    var dict = new Dictionary<string, string>();
+                    dict.Add("title", title);
+                    dict.Add("link", link);
+                    links_articles.Add(dict);
+                    links_aux.Add(link);
                 }
             }
-            // Imprimimos los links de los artículos con sus titulos
-            foreach (var article in linksArticles) {
-                Console.WriteLine(article["title"] + " - " + article["link"]);
-            }
 
+            // 
         }
     }
 }
