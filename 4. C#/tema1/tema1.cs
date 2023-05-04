@@ -7,7 +7,13 @@ using ScrapySharp.Network;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
-
+using KnowledgePicker.WordCloud;
+using KnowledgePicker.WordCloud.Coloring;
+using KnowledgePicker.WordCloud.Drawing;
+using KnowledgePicker.WordCloud.Layouts;
+using KnowledgePicker.WordCloud.Primitives;
+using KnowledgePicker.WordCloud.Sizers;
+using SkiaSharp;
 
 namespace WebScraper {
     // Declaracion de constantes
@@ -132,7 +138,36 @@ namespace WebScraper {
             Console.WriteLine($"** Se ha generado el archivo: {Constants.OUTPUT_FILE_FREQUENCIES} con las frecuencias de palabras!");
             Console.WriteLine("-----------------------------------------------------------------------------------------");
 
+            // Generar la nube
+            Console.WriteLine("** Generando nube de palabras...");
+            
+            // Configuración de la nube de palabras.
+            const int k = 6; // scale
+            var wordCloud = new WordCloudInput(frecuencias_ordenadas_50.Select(p => new WordCloudEntry(p.Key, p.Value))) {
+                Width = 1024 * k,
+                Height = 256 * k,
+                MinFontSize = 16 * k,
+                MaxFontSize = 32 * k
+            };
 
+            var sizer = new LogSizer(wordCloud);
+            using var engine = new SkGraphicEngine(sizer, wordCloud);
+            var layout = new SpiralLayout(wordCloud);
+            var colorizer = new RandomColorizer();
+            var wcg = new WordCloudGenerator<SKBitmap>(wordCloud, engine, layout, colorizer);
+
+            // Dibuja la nube de palabras.
+            using var final = new SKBitmap(wordCloud.Width, wordCloud.Height);
+            using var canvas = new SKCanvas(final);
+            canvas.Clear(SKColors.White);
+            using var bitmap = wcg.Draw();
+            canvas.DrawBitmap(bitmap, 0, 0);
+
+            // Guardar la nube de palabras.
+            using var data = final.Encode(SKEncodedImageFormat.Png, 100);
+            using var stream = File.OpenWrite("NUBE_PALABRAS.png");
+            data.SaveTo(stream);
+            Console.WriteLine($"** Se ha generado el archivo: NUBE_PALABRAS.png con la nube de palabras!");
         }
     }
 }
