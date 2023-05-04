@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using HtmlAgilityPack;
 using ScrapySharp.Extensions;
 using ScrapySharp.Network;
+using System.IO;
+using System.Net;
+using System.Text.RegularExpressions;
 
 
 namespace WebScraper {
@@ -76,6 +78,61 @@ namespace WebScraper {
 
             Console.WriteLine($"** Se ha generado el archivo: {Constants.OUTPUT_FILE_ARTICLES_CONTENT} con el contenido de todos los articulos scrapeados!");
             Console.WriteLine("-----------------------------------------------------------------------------------------");
+            // Leemos el archivo de texto generado utilizando la codificacion UTF-8
+            Console.WriteLine("**  Iniciando análisis de frecuencias de palabras...");
+            string text_file = File.ReadAllText(Constants.OUTPUT_FILE_ARTICLES_CONTENT, System.Text.Encoding.UTF8);
+
+            // Convertimos todo a minúsculas, eliminamos los caracteres especiales y separamos las palabras
+            text_file = text_file.ToLower();
+            text_file = Regex.Replace(text_file, @"[^a-zñáéíóúü\s]", "");
+            var palabras = text_file.Split(' ');
+
+            // Eliminamos todos los espacios en blanco
+            palabras = palabras.Where(palabra => !string.IsNullOrWhiteSpace(palabra))
+                            .Select(palabra => palabra.Trim())
+                            .ToArray();
+
+            // Contamos las frecuencias de cada palabra, sin contar las palabras que no nos interesan
+            Dictionary<string, int> frecuencias = new Dictionary<string, int>();
+            foreach (var palabra in palabras) {
+                if (!(Constants.WORDS_TO_DISMISS.Contains(palabra))) {
+                    if (frecuencias.ContainsKey(palabra)) {
+                        frecuencias[palabra]++;
+                    } else {
+                        frecuencias[palabra] = 1;
+                    }
+                }
+            }
+
+            // Ordenamos las frecuencias de mayor a menor
+            var frecuencias_ordenadas = frecuencias.OrderByDescending(x => x.Value);
+
+            // Guardamos las frecuencias en un archivo de texto
+            using (StreamWriter file = new StreamWriter(Constants.OUTPUT_FILE_FREQUENCIES, false, System.Text.Encoding.UTF8)) {
+                foreach (var item in frecuencias_ordenadas) {
+                    file.WriteLine($"{item.Key}:{item.Value}");
+                }
+            }
+
+            // Mostramos las 50 palabras más frecuentes
+            Dictionary<string, int> frecuencias_ordenadas_50 = new Dictionary<string, int>();
+            int contador = 0;
+            foreach (var item in frecuencias_ordenadas) {
+                if (contador == 50) {
+                    break;
+                }
+                frecuencias_ordenadas_50[item.Key] = item.Value;
+                contador++;
+            }
+            Console.WriteLine($"** Las 50 palabras más frecuentes son:");
+            foreach (var item in frecuencias_ordenadas_50) {
+                Console.WriteLine($"\t--> {item.Key}:{item.Value}");
+            }
+
+            Console.WriteLine($"** Se ha generado el archivo: {Constants.OUTPUT_FILE_FREQUENCIES} con las frecuencias de palabras!");
+            Console.WriteLine("-----------------------------------------------------------------------------------------");
+
+
         }
     }
 }
